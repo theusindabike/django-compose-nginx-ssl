@@ -1,4 +1,4 @@
-upstream vintem_api {
+upstream mysite {
     server app:8000;
 }
 
@@ -36,7 +36,7 @@ server {
     }
 
     location / {
-        proxy_pass http://vintem_api;
+        proxy_pass http://mysite;
         proxy_set_header X-Forwarded-Proto https;
         proxy_set_header X-Url-Scheme $scheme;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
