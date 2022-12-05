@@ -1,0 +1,61 @@
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: bash -c "cd ./app &&
+                      python manage.py collectstatic --no-input --clear &&
+                      gunicorn <DJANGO_APP_NAME>.wsgi:application --workers=2 --threads=4 --worker-class=gthread
+                                                           --bind 0.0.0.0:8000 --worker-tmp-dir /dev/shm"
+    volumes:
+      - static_volume:/app/static_files
+    expose:
+      - 8000
+    env_file:
+      - ./.env-sample
+    depends_on:
+      - db
+
+  db:
+    image: postgres:alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env-sample
+
+  proxy:
+    build: 
+      context: ./proxy 
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - static_volume:/app/static_files
+      - certbot-web:/vol/www
+      - proxy-dhparams:/vol/proxy
+      - certbot-certs:/etc/letsencrypt
+    environment:
+      - DOMAIN=${DOMAIN}
+    depends_on:
+      - app
+    
+  certbot:
+    build:
+      context: ./proxy/certbot
+    command: echo "Skipping..."
+    environment:
+      - ACME_DEFAULT_EMAIL=${ACME_DEFAULT_EMAIL}
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - certbot-web:/vol/www
+      - certbot-certs:/etc/letsencrypt
+    depends_on:
+      - proxy
+
+volumes:
+  static_volume:
+  postgres_data:
+  certbot-web:
+  proxy-dhparams:
+  certbot-certs:
