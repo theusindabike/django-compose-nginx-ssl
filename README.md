@@ -5,7 +5,7 @@ Here we have:
 2. with [Nginx](https://nginx.org/en/) as reverse proxy 
 3. and [certbot](https://hub.docker.com/r/certbot/certbot/) helping to renew ssl certificate
 
-Then, [docker-compose](https://docs.docker.com/compose/)
+Then, [docker-compose](https://docs.docker.com/compose/).
 
 ## Installation
 Just replace:
